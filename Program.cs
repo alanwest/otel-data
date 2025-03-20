@@ -33,19 +33,23 @@ var httpServerRequestDuration = meter.CreateHistogram<double>("http.server.reque
 
 for (;;)
 {
+    // Scenarios where transaction.name = span name
     SimulateWebRequest("GET", "/Users", null);
     SimulateWebRequest("POST", "/Users", null);
-    SimulateWebRequest("GET", "/Users", "Custom span name");
-    SimulateWebRequest("GET", null, "Custom span name");
-    SimulateWebRequest(null, null, "Foo");
-    SimulateWebRequest(null, null, "Bar");
-    SimulateWebRequest(null, null, "Baz");
-    SimulateWebRequest(null, null, null);
-
-    SimulateMessagingOperation(null, "/customers/{customerId}", null, null);
     SimulateMessagingOperation("process", "/customers/{customerId}", null, null);
     SimulateMessagingOperation("process", null, "MyTopic", null);
+
+    // Scenarios where transaction.name != span name
+    SimulateWebRequest("GET", "/Users", "Custom span name");
+    SimulateWebRequest("GET", null, "Custom span name");
     SimulateMessagingOperation("process", null, "MyTopic", "Custom span name");
+
+    // Scenarios where transaction.name != span name and transaction.name is unknown
+    SimulateWebRequest(null, null, "Foo");
+    SimulateWebRequest(null, null, "Bar");
+    SimulateWebRequest(null, null, null);
+    SimulateMessagingOperation(null, "/customers/{customerId}", null, null);
+
     Thread.Sleep(500);
 }
 
@@ -77,7 +81,7 @@ void SimulateMessagingOperation(string? operationType, string? destinationTempla
         : spanNameOverride;
 
     var tags = new TagList();
-    AddAttribute(ref tags, "messaging.operation.type", operationType);
+    AddAttribute(ref tags, "messaging.operation", operationType);
     AddAttribute(ref tags, "messaging.destination.template", destinationTemplate);
     AddAttribute(ref tags, "messaging.destination.name", destinationName);
 
