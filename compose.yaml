@@ -1,0 +1,19 @@
+services:
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.122.0
+    volumes:
+      - ./otelcol-config.yaml:/otelcol-config.yaml
+    command: ["--config=/otelcol-config.yaml"]
+    environment:
+      - DEBUG_EXPORTER_VERBOSITY
+      - NEW_RELIC_API_KEY
+      - NEW_RELIC_OTLP_ENDPOINT
+  app:
+    build:
+      context: .
+      target: final
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_EXPORTER_OTLP_PROTOCOL
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      - OTEL_METRIC_EXPORT_INTERVAL
