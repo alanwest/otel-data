@@ -20,11 +20,11 @@ not conform to the OpenTelemetry semantic conventions.
 
 ## Background
 
-New Relic’s APM experience is centered around the notion of a transaction. This
-is true even for services that are instrumented with OpenTelemetry despite
+New Relic’s APM experience is centered around the notion of a [transaction](https://docs.newrelic.com/docs/apm/transactions/intro-transactions/transactions-new-relic-apm/).
+This is true even for services that are instrumented with OpenTelemetry despite
 OpenTelemetry not having a direct analog to New Relic’s notion of a
-transaction. New Relic leverages OpenTelemetry’s semantic conventions to drive
-its transaction-centric APM experience.
+transaction. New Relic leverages OpenTelemetry’s [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
+to drive its transaction-centric APM experience.
 
 Each transaction has a name. For example, when using New Relic’s APM agents to
 instrument a web application, a transaction is created for each request
@@ -34,12 +34,12 @@ request - e.g., HTTP method or response code.
 
 Although OpenTelemetry instrumentation does not create transactions, it does
 emit telemetry with similar identifying characteristics. For an HTTP service,
-OpenTelemetry instrumentation emits the `http.server.request.duration` metric
-for measuring the duration of web requests. The HTTP semantic conventions
-require a number of attributes be present on the `http.server.request.duration`
-metric. We leverage the `http.request.method` and `http.route` attributes to
-derive a transaction name for the purpose of driving the New Relic APM
-experience.
+OpenTelemetry instrumentation emits the [`http.server.request.duration`](https://opentelemetry.io/docs/specs/semconv/http/http-metrics/#metric-httpserverrequestduration)
+metric for measuring the duration of web requests. The HTTP semantic
+conventions require a number of attributes be present on the
+`http.server.request.duration` metric. We leverage the `http.request.method`
+and `http.route` attributes to derive a transaction name for the purpose of
+driving the New Relic APM experience.
 
 OpenTelemetry HTTP instrumentation also emits span data following the same HTTP
 semantic conventions. Notably, the span generated for a request uses the same
@@ -79,10 +79,10 @@ On span data the `transaction.name` attribute will contain `unknown`.
 
 One characteristic unique to span data is that spans have a name whereas a
 metric is distinguished only by its attributes. In the context of HTTP
-services, note that the HTTP span semantic conventions declare that the span
-representing an HTTP request should be named by concatenating the HTTP method
-and route. However, some customers have circumstances where they choose to set
-the span name differently.
+services, note that the [HTTP span semantic conventions](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name)
+declare that the span representing an HTTP request should be named by
+concatenating the HTTP method and route. However, some customers have
+circumstances where they choose to set the span name differently.
 
 For the purposes of correlating transaction traces in the APM UI we’re required
 to leverage the symmetry between the attributes present on both metric and span
