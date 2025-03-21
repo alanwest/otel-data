@@ -16,11 +16,15 @@ To run the application:
 
 3. View the data in New Relic. The service name will be `otel-service`.
 
+## Generated data
+
 The application simulates web requests and messaging operations. It
 demonstrates a number of scenarios where either the telemetry conforms or does
 not conform to the OpenTelemetry semantic conventions.
 
-## Background
+The scenarios are [documented in the code](https://github.com/alanwest/otel-data/blob/e032cd40df08d325334a7a25e8c4d7de09f6ad85/Program.cs#L36-L59).
+
+## Additional background
 
 New Relic’s APM experience is centered around the notion of a [transaction](https://docs.newrelic.com/docs/apm/transactions/intro-transactions/transactions-new-relic-apm/).
 This is true even for services that are instrumented with OpenTelemetry despite
