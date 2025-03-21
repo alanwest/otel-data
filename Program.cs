@@ -33,22 +33,30 @@ var httpServerRequestDuration = meter.CreateHistogram<double>("http.server.reque
 
 for (;;)
 {
-    // Scenarios where transaction.name = span name
-    SimulateWebRequest("GET", "/Users", null);
-    SimulateWebRequest("POST", "/Users", null);
-    SimulateMessagingOperation("process", "/customers/{customerId}", null, null);
-    SimulateMessagingOperation("process", null, "MyTopic", null);
+    /// transaction.name = WebTransaction/server/GET /Users
+    /* span name = GET /Users       */ SimulateWebRequest("GET", "/Users", null);
+    /* span name = Custom span name */ SimulateWebRequest("GET", "/Users", "Custom span name");
 
-    // Scenarios where transaction.name != span name
-    SimulateWebRequest("GET", "/Users", "Custom span name");
-    SimulateWebRequest("GET", null, "Custom span name");
-    SimulateMessagingOperation("process", null, "MyTopic", "Custom span name");
+    /// transaction.name = WebTransaction/server/POST /Users
+    /* span name = POST /Users      */ SimulateWebRequest("POST", "/Users", null);
 
-    // Scenarios where transaction.name != span name and transaction.name is unknown
-    SimulateWebRequest(null, null, "Foo");
-    SimulateWebRequest(null, null, "Bar");
-    SimulateWebRequest(null, null, null);
-    SimulateMessagingOperation(null, "/customers/{customerId}", null, null);
+    /// transaction.name = WebTransaction/server/GET
+    /* span name = Custom span name */ SimulateWebRequest("GET", null, "Custom span name");
+
+    /// transaction.name = WebTransaction/server/unknown
+    /* span name = Foo              */ SimulateWebRequest(null, null, "Foo");
+    /* span name = Bar              */ SimulateWebRequest(null, null, "Bar");
+    /* span name =                  */ SimulateWebRequest(null, null, null);
+
+    /// transaction.name = OtherTransaction/consumer/process//customers/{customerId}
+    /* span name = /customers/{customerId} process */ SimulateMessagingOperation("process", "/customers/{customerId}", null, null);
+
+    /// transaction.name = OtherTransaction/consumer/process/MyTopic
+    /* span name = MyTopic process                 */ SimulateMessagingOperation("process", null, "MyTopic", null);
+    /* span name = Custom span name                */ SimulateMessagingOperation("process", null, "MyTopic", "Custom span name");
+
+    // transaction.name = OtherTransaction/consumer/unknown
+    /* span name = /customers/{customerId}         */ SimulateMessagingOperation(null, "/customers/{customerId}", null, null);
 
     Thread.Sleep(500);
 }
@@ -74,14 +82,14 @@ void SimulateWebRequest(string? httpMethod, string? httpRoute, string? spanNameO
     httpServerRequestDuration.Record(requestDuration, tags);
 }
 
-void SimulateMessagingOperation(string? operationType, string? destinationTemplate, string? destinationName, string? spanNameOverride)
+void SimulateMessagingOperation(string? operation, string? destinationTemplate, string? destinationName, string? spanNameOverride)
 {
     var activityName = spanNameOverride == null
-        ? string.Join(" ", operationType, destinationTemplate ?? destinationName)
+        ? string.Join(" ", destinationTemplate ?? destinationName, operation)
         : spanNameOverride;
 
     var tags = new TagList();
-    AddAttribute(ref tags, "messaging.operation", operationType);
+    AddAttribute(ref tags, "messaging.operation", operation);
     AddAttribute(ref tags, "messaging.destination.template", destinationTemplate);
     AddAttribute(ref tags, "messaging.destination.name", destinationName);
 
