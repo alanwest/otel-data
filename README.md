@@ -10,9 +10,11 @@ To run the application:
 
 2. Then run:
 
-```shell
-docker compose up --build
-```
+   ```shell
+   docker compose up --build
+   ```
+
+3. View the data in New Relic. The service name will be `otel-service`.
 
 The application simulates web requests and messaging operations. It
 demonstrates a number of scenarios where either the telemetry conforms or does
